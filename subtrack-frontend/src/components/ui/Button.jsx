@@ -1,15 +1,11 @@
-// src/components/ui/Button.jsx
 import React from "react";
-import { cn } from "../../lib/utils";
 
-const Button = ({ children, className, type = "button", ...props }) => {
+const Button = ({ children, onClick, type = "button", className = "", ...props }) => {
   return (
     <button
       type={type}
-      className={cn(
-        "px-4 py-2 rounded-md bg-primary text-white hover:bg-primary-dark transition-colors disabled:opacity-50",
-        className
-      )}
+      onClick={onClick}
+      className={`bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-semibold transition duration-200 ${className}`}
       {...props}
     >
       {children}
