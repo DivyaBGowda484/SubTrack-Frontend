@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import axios from "axios";
+import api from "../services/api";
 
 const AuthContext = createContext();
 
@@ -9,29 +9,52 @@ export const AuthProvider = ({ children }) => {
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
-  const login = async (credentials) => {
+  const login = async (email, password) => {
     try {
-      const response = await axios.post("/api/auth/login", credentials);
-      setUser(response.data.user);
-      localStorage.setItem("subtrack_user", JSON.stringify(response.data.user));
-      localStorage.setItem("subtrack_token", response.data.token);
+      const response = await api.post("/auth/login", { email, password });
+      
+      // Handle different response formats
+      const userData = response.data.user || response.data;
+      const token = response.data.token || response.data.access_token;
+      
+      setUser(userData);
+      localStorage.setItem("subtrack_user", JSON.stringify(userData));
+      localStorage.setItem("subtrack_token", token);
+      
       return { success: true };
     } catch (err) {
       console.error("Login error:", err);
-      return { success: false, error: err.response?.data?.detail || "Login failed" };
+      const errorMessage = err.response?.data?.detail || 
+                          err.response?.data?.message || 
+                          "Login failed";
+      return { success: false, error: errorMessage };
     }
   };
 
-  const register = async (credentials) => {
+  const register = async (email, password, name) => {
     try {
-      const response = await axios.post("/api/auth/register", credentials);
-      setUser(response.data.user);
-      localStorage.setItem("subtrack_user", JSON.stringify(response.data.user));
-      localStorage.setItem("subtrack_token", response.data.token);
+      const response = await api.post("/auth/signup", { 
+        email, 
+        password, 
+        name,
+        full_name: name // Some backends expect full_name
+      });
+      
+      // Handle different response formats
+      const userData = response.data.user || response.data;
+      const token = response.data.token || response.data.access_token;
+      
+      setUser(userData);
+      localStorage.setItem("subtrack_user", JSON.stringify(userData));
+      localStorage.setItem("subtrack_token", token);
+      
       return { success: true };
     } catch (err) {
       console.error("Register error:", err);
-      return { success: false, error: err.response?.data?.detail || "Registration failed" };
+      const errorMessage = err.response?.data?.detail || 
+                          err.response?.data?.message || 
+                          "Registration failed";
+      return { success: false, error: errorMessage };
     }
   };
 
@@ -44,9 +67,9 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem("subtrack_token");
     if (token) {
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     } else {
-      delete axios.defaults.headers.common["Authorization"];
+      delete api.defaults.headers.common["Authorization"];
     }
   }, [user]);
 
@@ -57,4 +80,5 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
+export { AuthContext };
 export const useAuth = () => useContext(AuthContext);

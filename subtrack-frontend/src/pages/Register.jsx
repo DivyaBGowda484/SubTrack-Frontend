@@ -1,38 +1,96 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
+import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import axios from "../services/api";
 
 const Register = () => {
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const { register } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    await axios.post("/register", formData);
-    navigate("/login");
+    setError("");
+    setLoading(true);
+    
+    try {
+      const result = await register(email, password, name);
+      if (result.success) {
+        navigate("/dashboard");
+      } else {
+        setError(result.error || "Registration failed");
+      }
+    } catch (err) {
+      setError("An unexpected error occurred");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-50">
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded shadow w-full max-w-md">
-        <h2 className="text-xl font-semibold mb-4">Register</h2>
-        <input
-          type="email"
-          placeholder="Email"
-          className="input input-bordered w-full mb-4"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          className="input input-bordered w-full mb-4"
-          value={formData.password}
-          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-          required
-        />
-        <button type="submit" className="btn btn-primary w-full">Register</button>
+      <form onSubmit={handleRegister} className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">Register</h2>
+        
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {error}
+          </div>
+        )}
+        
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Full Name"
+            className="input"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            disabled={loading}
+          />
+        </div>
+        
+        <div className="mb-4">
+          <input
+            type="email"
+            placeholder="Email"
+            className="input"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            disabled={loading}
+          />
+        </div>
+        
+        <div className="mb-6">
+          <input
+            type="password"
+            placeholder="Password"
+            className="input"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            disabled={loading}
+          />
+        </div>
+        
+        <button 
+          type="submit" 
+          className="btn btn-primary w-full"
+          disabled={loading}
+        >
+          {loading ? "Creating account..." : "Register"}
+        </button>
+        
+        <p className="mt-4 text-center text-gray-600">
+          Already have an account?{" "}
+          <a href="/login" className="text-blue-600 hover:text-blue-800">
+            Login here
+          </a>
+        </p>
       </form>
     </div>
   );
