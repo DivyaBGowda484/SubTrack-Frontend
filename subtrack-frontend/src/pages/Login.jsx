@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const Login = () => {
   const { login } = useContext(AuthContext);
@@ -15,15 +15,47 @@ const Login = () => {
     setError("");
     setLoading(true);
     
+    console.log("Attempting login with:", { email, password });
+    
     try {
       const result = await login(email, password);
+      console.log("Login result:", result);
+      
       if (result.success) {
+        console.log("Login successful, navigating to dashboard");
         navigate("/dashboard");
       } else {
+        console.log("Login failed:", result.error);
         setError(result.error || "Login failed");
       }
     } catch (err) {
+      console.error("Login error:", err);
       setError("An unexpected error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTestLogin = async () => {
+    setError("");
+    setLoading(true);
+    
+    console.log("Testing login with test@example.com / password123");
+    
+    try {
+      const result = await login('test@example.com', 'password123');
+      console.log("Test login result:", result);
+      
+      if (result.success) {
+        console.log("Test login successful, navigating to dashboard");
+        navigate("/dashboard");
+      } else {
+        console.log("Test login failed:", result.error);
+        setError(result.error || "Test login failed");
+      }
+    } catch (err) {
+      console.error("Test login error:", err);
+      setError("Test login error: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -66,18 +98,33 @@ const Login = () => {
         
         <button 
           type="submit" 
-          className="btn btn-primary w-full"
+          className="btn btn-primary w-full mb-3"
           disabled={loading}
         >
           {loading ? "Logging in..." : "Login"}
         </button>
+
+        <button 
+          type="button" 
+          onClick={handleTestLogin}
+          className="btn btn-secondary w-full mb-3"
+          disabled={loading}
+        >
+          {loading ? "Testing..." : "Test Login (test@example.com)"}
+        </button>
         
         <p className="mt-4 text-center text-gray-600">
           Don't have an account?{" "}
-          <a href="/register" className="text-blue-600 hover:text-blue-800">
+          <Link to="/register" className="text-blue-600 hover:text-blue-800">
             Register here
-          </a>
+          </Link>
         </p>
+        
+        {/* Debug info */}
+        <div className="mt-4 p-3 bg-gray-100 rounded text-xs">
+          <p>Debug: Try logging in with test@example.com / password123</p>
+          <p>Or use the "Test Login" button above</p>
+        </div>
       </form>
     </div>
   );

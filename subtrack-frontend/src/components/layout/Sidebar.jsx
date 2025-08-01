@@ -6,7 +6,8 @@ const Sidebar = () => {
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: '📊' },
     { path: '/subscriptions', label: 'Subscriptions', icon: '📋' },
-    { path: '/expenses', label: 'Expenses', icon: '💰' },
+    { path: '/expenses', label: 'Expenses', icon: '��' },
+    { path: '/notifications', label: 'Notifications', icon: '🔔' },
     { path: '/profile', label: 'Profile', icon: '👤' },
   ];
 

@@ -16,18 +16,41 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Debug logging
+    console.log('API Request:', {
+      method: config.method,
+      url: config.url,
+      data: config.data,
+      headers: config.headers
+    });
+    
     return config;
   },
   (error) => {
+    console.error('API Request Error:', error);
     return Promise.reject(error);
   }
 );
 
 // Response interceptor to handle errors
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Debug logging
+    console.log('API Response:', {
+      status: response.status,
+      data: response.data,
+      url: response.config.url
+    });
+    return response;
+  },
   (error) => {
-    console.error('API Error:', error.response?.data || error.message);
+    console.error('API Error:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+      url: error.config?.url
+    });
     
     if (error.response?.status === 401) {
       // Token expired or invalid
